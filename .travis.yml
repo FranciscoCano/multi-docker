@@ -1,4 +1,6 @@
 sudo: required
+language: generic
+
 services:
   - docker
 
@@ -6,19 +8,17 @@ before_install:
   - docker build -t fjcs/react-test -f ./client/Dockerfile.dev ./client
 
 script:
-  - docker run -e CI=true fjcs/react-test npm test -- --coverage
+  - docker run -e CI=true fjcs/react-test npm test
 
 after_success:
   - docker build -t fjcs/multi-client ./client
   - docker build -t fjcs/multi-nginx ./nginx
   - docker build -t fjcs/multi-server ./server
   - docker build -t fjcs/multi-worker ./worker
-
   # Log in to the docker CLI
-  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID"
-
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
   # Take those images and push them to docker hub
-  docker push fjcs/multi-client
-  docker push fjcs/multi-nginx
-  docker push fjcs/multi-server
-  docker push fjcs/multi-worker
+  - docker push fjcs/multi-client
+  - docker push fjcs/multi-nginx
+  - docker push fjcs/multi-server
+  - docker push fjcs/multi-worker
